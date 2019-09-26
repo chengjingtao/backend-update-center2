@@ -25,14 +25,13 @@ package org.jvnet.hudson.update_center;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.maven.index.ArtifactInfo;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
-import org.sonatype.nexus.index.ArtifactInfo;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -109,7 +108,7 @@ public class Plugin {
     }
 
     public Plugin(HPI hpi) throws IOException {
-        this(hpi.artifact.artifactId, hpi,  null);
+        this(hpi.artifact.getArtifactId(), hpi,  null);
     }
 
     public void setNowiki(boolean nowiki) {
@@ -217,7 +216,7 @@ public class Plugin {
                                             parent.element("groupId").getTextTrim(),
                                             parent.element("artifactId").getTextTrim(),
                                             parent.element("version").getTextTrim(),
-                                            ""), "pom", null));
+                                            "", "pom")));
                     scm = selectSingleValue(parentPom, "/project/scm/connection");
                 } catch (Exception ex) {
                     System.out.println("** Failed to read parent pom");

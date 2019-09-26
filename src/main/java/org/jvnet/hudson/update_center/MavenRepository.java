@@ -4,8 +4,7 @@ import hudson.util.VersionNumber;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.sonatype.nexus.index.ArtifactInfo;
-import org.sonatype.nexus.index.context.UnsupportedExistingLuceneIndexException;
+import org.apache.maven.index.context.UnsupportedExistingLuceneIndexException;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.maven.index.ArtifactInfo;
 
 /**
  * A collection of artifacts from which we build index.
@@ -20,6 +20,21 @@ import java.util.TreeMap;
  * @author Kohsuke Kawaguchi
  */
 public abstract class MavenRepository {
+
+    private String repositoryURL;
+
+    public String getRepositoryURL() {
+        return repositoryURL;
+    }
+
+    public void setRepositoryURL(String repositoryURL) {
+        this.repositoryURL = repositoryURL;
+    }
+
+    public void close() throws IOException {
+
+    }
+
     /**
      * Discover all plugins from this Maven repository.
      */
@@ -37,7 +52,7 @@ public abstract class MavenRepository {
             for (HPI h : p.artifacts.values()) {
                 try {
                     Date releaseDate = h.getTimestampAsDate();
-                    System.out.println("adding " + h.artifact.artifactId + ":" + h.version);
+                    System.out.println("adding " + h.artifact.getArtifactId() + ":" + h.version);
                     Map<String,HPI> pluginsOnDate = plugins.get(releaseDate);
                     if (pluginsOnDate==null) {
                         pluginsOnDate = new TreeMap<String,HPI>();
@@ -77,7 +92,7 @@ public abstract class MavenRepository {
     public abstract TreeMap<VersionNumber,HudsonWar> getHudsonWar() throws IOException, AbstractArtifactResolutionException;
 
     protected File resolve(ArtifactInfo a) throws AbstractArtifactResolutionException {
-        return resolve(a,a.packaging, null);
+        return resolve(a,a.getPackaging(), null);
     }
 
     protected abstract File resolve(ArtifactInfo a, String type, String classifier) throws AbstractArtifactResolutionException;

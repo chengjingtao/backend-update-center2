@@ -2,10 +2,10 @@ package org.jvnet.hudson.update_center;
 
 import hudson.util.VersionNumber;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
+import org.apache.maven.index.ArtifactInfo;
+import org.apache.maven.index.context.UnsupportedExistingLuceneIndexException;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.sonatype.nexus.index.ArtifactInfo;
-import org.sonatype.nexus.index.context.UnsupportedExistingLuceneIndexException;
 
 import java.io.File;
 import java.io.IOException;

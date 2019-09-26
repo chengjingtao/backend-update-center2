@@ -27,23 +27,30 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
-import org.sonatype.nexus.index.ArtifactInfo;
+import org.apache.maven.index.ArtifactInfo;
+
 
 /**
  * HPI object linking direct to maven repository.
  */
-public class DirectHPI extends HPI
-{
+public class DirectHPI extends HPI {
 
     public DirectHPI(MavenRepository repository, PluginHistory history,
-            ArtifactInfo artifact) throws AbstractArtifactResolutionException
-    {
+                     ArtifactInfo artifact) throws AbstractArtifactResolutionException {
         super(repository, history, artifact);
     }
-    
+
     @Override
-    public URL getURL() throws MalformedURLException
-    {
-        return new URL(artifact.remoteUrl);
+    public URL getURL() throws MalformedURLException {
+        return new URL(repository.getRepositoryURL() + hackPath());
+    }
+
+    private String hackPath() {
+        String groupPath = artifact.getGroupId().replace(".", "/");
+        String artifactId = artifact.getArtifactId();
+        String version = artifact.getVersion();
+        String extension = artifact.getFileExtension();
+
+        return String.format("%s/%s/%s/%s-%s.%s", groupPath, artifactId, version, artifactId, version, extension);
     }
 }

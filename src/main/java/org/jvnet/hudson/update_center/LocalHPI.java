@@ -35,7 +35,7 @@ import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
-import org.sonatype.nexus.index.ArtifactInfo;
+import org.apache.maven.index.ArtifactInfo;
 
 /**
  * HPI located in local.
@@ -81,14 +81,14 @@ public class LocalHPI extends HPI
         try
         {
             jar = new JarFile(jarFile);
-            String pomPath = String.format("META-INF/maven/%s/%s/pom.xml", artifact.groupId, artifact.artifactId);
+            String pomPath = String.format("META-INF/maven/%s/%s/pom.xml", artifact.getGroupId(), artifact.getArtifactId());
             ZipEntry e = jar.getEntry(pomPath);
             if (e == null)
             {
                 return null;
             }
             
-            File temporaryFile = File.createTempFile(TEMP_PREFIX + artifact.artifactId, ".xml");
+            File temporaryFile = File.createTempFile(TEMP_PREFIX + artifact.getArtifactId(), ".xml");
             temporaryFile.deleteOnExit();
             
             in = jar.getInputStream(e);

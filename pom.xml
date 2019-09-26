@@ -70,6 +70,8 @@
     <keyName>${project.basedir}/test</keyName>
     <args4j.version>2.0.19</args4j.version>
     <main.class>org.jvnet.hudson.update_center.Main</main.class>
+    <eclipse-sisu.version>0.3.3</eclipse-sisu.version>
+    <lucene.version>5.5.5</lucene.version>
   </properties>
 
   <dependencies>
@@ -108,30 +110,156 @@
       <artifactId>args4j</artifactId>
       <version>${args4j.version}</version>
     </dependency>
+    <!-- Lucene -->
     <dependency>
-      <groupId>org.sonatype.nexus</groupId>
-      <artifactId>nexus-indexer</artifactId>
-      <version>2.0.0</version>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>5.5.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+      <version>5.5.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>5.5.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-backward-codecs</artifactId>
+      <version>5.5.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
+      <version>5.5.5</version>
+    </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>org.sonatype.nexus</groupId>-->
+      <!--<artifactId>nexus-indexer</artifactId>-->
+      <!--<version>2.0.4</version>-->
+      <!--<exclusions>-->
+        <!--<exclusion>&lt;!&ndash; instead we pick this up from maven-compat &ndash;&gt;-->
+          <!--<groupId>org.apache.maven</groupId>-->
+          <!--<artifactId>maven-artifact-manager</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>&lt;!&ndash; instead we pick this up from maven-compat &ndash;&gt;-->
+          <!--<groupId>org.apache.maven</groupId>-->
+          <!--<artifactId>maven-artifact</artifactId>-->
+        <!--</exclusion>-->
+      <!--</exclusions>-->
+    <!--</dependency>-->
+    <dependency>
+      <groupId>org.apache.maven.indexer</groupId>
+      <artifactId>indexer-core</artifactId>
+      <version>6.0.0</version>
+    </dependency>
+    <!--<dependency>&lt;!&ndash; this version doesn't have ugly snapshot Google collection dependency &ndash;&gt;-->
+      <!--<groupId>org.codehaus.plexus</groupId>-->
+      <!--<artifactId>plexus-container-default</artifactId>-->
+      <!--<version>2.0.0</version>-->
+    <!--</dependency>-->
+
+
+    <!-- DI -->
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>1.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>aopalliance</groupId>
+      <artifactId>aopalliance</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>4.1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+      <version>4.1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-assistedinject</artifactId>
+      <version>4.1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.sisu</groupId>
+      <artifactId>org.eclipse.sisu.inject</artifactId>
+      <version>${eclipse-sisu.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.sisu</groupId>
+      <artifactId>org.eclipse.sisu.plexus</artifactId>
+      <version>${eclipse-sisu.version}</version>
       <exclusions>
-        <exclusion><!-- instead we pick this up from maven-compat -->
-          <groupId>org.apache.maven</groupId>
-          <artifactId>maven-artifact-manager</artifactId>
-        </exclusion>
-        <exclusion><!-- instead we pick this up from maven-compat -->
-          <groupId>org.apache.maven</groupId>
-          <artifactId>maven-artifact</artifactId>
+        <exclusion>
+          <groupId>javax.annotation</groupId>
+          <artifactId>jsr250-api</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
-    <dependency><!-- this version doesn't have ugly snapshot Google collection dependency -->
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-container-default</artifactId>
-      <version>1.5.5</version>
+
+    <!-- Lucene -->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${lucene.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+
+    <!-- including old codecs to read central index -->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-backward-codecs</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+
+
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-http</artifactId>
-      <version>1.0-beta-5</version>
+      <version>2.12</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -166,7 +294,7 @@
       <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
-  
+
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/backend-update-center2.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/backend-update-center2.git</developerConnection>

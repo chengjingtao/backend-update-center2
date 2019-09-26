@@ -25,11 +25,19 @@ package org.jvnet.hudson.update_center;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.apache.lucene.document.Document;
-import org.sonatype.nexus.index.ArtifactContext;
-import org.sonatype.nexus.index.ArtifactInfo;
-import org.sonatype.nexus.index.creator.AbstractIndexCreator;
+//import org.sonatype.nexus.index.ArtifactContext;
+//import org.sonatype.nexus.index.ArtifactInfo;
+//import org.sonatype.nexus.index.creator.AbstractIndexCreator;
+import org.apache.maven.index.creator.*;
+import org.apache.maven.index.*;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StoredField;
+
 
 /**
  * Fix artifact extension to hpi.
@@ -38,7 +46,60 @@ import org.sonatype.nexus.index.creator.AbstractIndexCreator;
 public class HpiFixupIndexCreator extends AbstractIndexCreator
 {
 
-    @Override
+    /**
+     * Info: packaging, lastModified, size, sourcesExists, javadocExists, signatureExists. Stored, not indexed.
+     */
+    public static final IndexerField FLD_INFO = new IndexerField( NEXUS.INFO, IndexerFieldVersion.V1, "i",
+            "Artifact INFO (not indexed, stored)", Field.Store.YES, Field.Index.NO );
+
+    public static final IndexerField FLD_GROUP_ID_KW = new IndexerField( MAVEN.GROUP_ID, IndexerFieldVersion.V1, "g",
+            "Artifact GroupID (as keyword)", Field.Store.NO, Field.Index.NOT_ANALYZED );
+
+    public static final IndexerField FLD_GROUP_ID = new IndexerField( MAVEN.GROUP_ID, IndexerFieldVersion.V3,
+            "groupId", "Artifact GroupID (tokenized)", Field.Store.NO, Field.Index.ANALYZED );
+
+    public static final IndexerField FLD_ARTIFACT_ID_KW = new IndexerField( MAVEN.ARTIFACT_ID, IndexerFieldVersion.V1,
+            "a", "Artifact ArtifactID (as keyword)", Field.Store.NO, Field.Index.NOT_ANALYZED );
+
+    public static final IndexerField FLD_ARTIFACT_ID = new IndexerField( MAVEN.ARTIFACT_ID, IndexerFieldVersion.V3,
+            "artifactId", "Artifact ArtifactID (tokenized)", Field.Store.NO, Field.Index.ANALYZED );
+
+    public static final IndexerField FLD_VERSION_KW = new IndexerField( MAVEN.VERSION, IndexerFieldVersion.V1, "v",
+            "Artifact Version (as keyword)", Field.Store.NO, Field.Index.NOT_ANALYZED );
+
+    public static final IndexerField FLD_VERSION = new IndexerField( MAVEN.VERSION, IndexerFieldVersion.V3, "version",
+            "Artifact Version (tokenized)", Field.Store.NO, Field.Index.ANALYZED );
+
+    public static final IndexerField FLD_PACKAGING = new IndexerField( MAVEN.PACKAGING, IndexerFieldVersion.V1, "p",
+            "Artifact Packaging (as keyword)", Field.Store.NO, Field.Index.NOT_ANALYZED );
+
+    public static final IndexerField FLD_EXTENSION = new IndexerField( MAVEN.EXTENSION, IndexerFieldVersion.V1, "e",
+            "Artifact extension (as keyword)", Field.Store.NO, Field.Index.NOT_ANALYZED );
+
+    public static final IndexerField FLD_CLASSIFIER = new IndexerField( MAVEN.CLASSIFIER, IndexerFieldVersion.V1, "l",
+            "Artifact classifier (as keyword)", Field.Store.NO, Field.Index.NOT_ANALYZED );
+
+    public static final IndexerField FLD_NAME = new IndexerField( MAVEN.NAME, IndexerFieldVersion.V1, "n",
+            "Artifact name (tokenized, stored)", Field.Store.YES, Field.Index.ANALYZED );
+
+    public static final IndexerField FLD_DESCRIPTION = new IndexerField( MAVEN.DESCRIPTION, IndexerFieldVersion.V1,
+            "d", "Artifact description (tokenized, stored)", Field.Store.YES, Field.Index.ANALYZED );
+
+    public static final IndexerField FLD_LAST_MODIFIED = new IndexerField( MAVEN.LAST_MODIFIED, IndexerFieldVersion.V1,
+            "m", "Artifact last modified (not indexed, stored)", Field.Store.YES, Field.Index.NO );
+
+    public static final IndexerField FLD_SHA1 = new IndexerField( MAVEN.SHA1, IndexerFieldVersion.V1, "1",
+            "Artifact SHA1 checksum (as keyword, stored)", Field.Store.YES, Field.Index.NOT_ANALYZED );
+
+
+    public static final String ID = "hpi";
+
+    public HpiFixupIndexCreator()
+    {
+        super( ID);
+    }
+
+//    @Override
     public void populateArtifactInfo(ArtifactContext artifactContext)
             throws IOException
     {
@@ -46,23 +107,27 @@ public class HpiFixupIndexCreator extends AbstractIndexCreator
         
     }
 
-    @Override
+//    @Override
     public void updateDocument(ArtifactInfo artifactInfo, Document document)
     {
         // TODO Auto-generated method stub
         
     }
 
-    @Override
+//    @Override
     public boolean updateArtifactInfo(Document document,
             ArtifactInfo artifactInfo)
     {
-        if (!"hpi".equals(artifactInfo.packaging)) return false;
+        if (!"hpi".equals(artifactInfo.getPackaging())) return false;
 
-        if (Arrays.asList("hpi", "jpi").contains(artifactInfo.fextension)) return false;
+        if (Arrays.asList("hpi", "jpi").contains(artifactInfo.getFileExtension())) return false;
 
-        artifactInfo.fextension = "hpi";
+        artifactInfo.setFileExtension("hpi");
         return true;
     }
-    
+
+    public Collection<IndexerField> getIndexerFields()
+    {
+        return Collections.emptyList();
+    }
 }

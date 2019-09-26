@@ -1,6 +1,7 @@
 import org.jvnet.hudson.update_center.DefaultMavenRepositoryBuilder;
 import org.jvnet.hudson.update_center.HPI;
-import org.jvnet.hudson.update_center.MavenRepositoryImpl;
+import org.jvnet.hudson.update_center.MavenRepositoryNexus3Impl;
+import org.jvnet.hudson.update_center.MavenRepositoryNexus3Impl;
 import org.jvnet.hudson.update_center.PluginHistory;
 
 import java.util.Collection;
@@ -12,7 +13,7 @@ import java.util.Collection;
  */
 public class ListPluginsAndVersions {
     public static void main(String[] args) throws Exception{
-        MavenRepositoryImpl r = DefaultMavenRepositoryBuilder.createStandardInstance();
+        MavenRepositoryNexus3Impl r = DefaultMavenRepositoryBuilder.createStandardInstance();
 
         System.out.println(r.getHudsonWar().firstKey());
 

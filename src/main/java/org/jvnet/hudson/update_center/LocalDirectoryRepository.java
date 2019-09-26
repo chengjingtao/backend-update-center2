@@ -34,14 +34,15 @@ import java.util.TreeMap;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
+import org.apache.maven.index.ArtifactInfo;
+import org.apache.maven.index.ArtifactAvailability;
+import org.apache.maven.index.context.UnsupportedExistingLuceneIndexException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.sonatype.nexus.index.ArtifactAvailablility;
-import org.sonatype.nexus.index.ArtifactInfo;
-import org.sonatype.nexus.index.context.UnsupportedExistingLuceneIndexException;
 
 /**
  * Use a local repository containing HPI files as a plugin repository.
@@ -110,30 +111,14 @@ public class LocalDirectoryRepository extends MavenRepository
             // Short-Name seems always present and have the same value as the other two.
             String artifactId = manifest.getMainAttributes().getValue("Short-Name");
             ArtifactInfo a = new ArtifactInfo(
-                    null,  // fname
-                    extension,
-                    groupId,
-                    artifactId,
-                    manifest.getMainAttributes().getValue("Plugin-Version"),    // version
-                        // maybe Implementation-Version is more proper.
-                    null,  // classifier
-                    "hpi",  // packaging
-                    manifest.getMainAttributes().getValue("Long-Name"),    // name
-                    manifest.getMainAttributes().getValue("Specification-Title"),    // description
-                    lastModified,   // lastModified
-                    hpiFile.length(),   // size
-                    null,   // md5
-                    null,   // sha1
-                    ArtifactAvailablility.NOT_PRESENT, // sourcesExists
-                    ArtifactAvailablility.NOT_PRESENT, //javadocExists,
-                    ArtifactAvailablility.NOT_PRESENT, //signatureExists,
-                    null    // repository
+                    null, groupId, artifactId, manifest.getMainAttributes().getValue("Plugin-Version"), null,
+                    extension
             );
             
-            if (!includeSnapshots && a.version.contains("SNAPSHOT"))     continue;       // ignore snapshots
-            PluginHistory p = plugins.get(a.artifactId);
+            if (!includeSnapshots && a.getVersion().contains("SNAPSHOT"))     continue;       // ignore snapshots
+            PluginHistory p = plugins.get(a.getArtifactId());
             if (p==null)
-                plugins.put(a.artifactId, p=new PluginHistory(a.artifactId));
+                plugins.put(a.getArtifactId(), p=new PluginHistory(a.getArtifactId()));
             
             URL url;
             if (downloadDir == null) {
@@ -153,7 +138,7 @@ public class LocalDirectoryRepository extends MavenRepository
                 url = new URL(new URL(baseUrl, "download/"), path);
             }
             p.addArtifact(new LocalHPI(this, p, a, hpiFile, url));
-            p.groupId.add(a.groupId);
+            p.groupId.add(a.getGroupId());
         }
         
         return plugins.values();

@@ -51,11 +51,16 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
+
+import org.apache.maven.index.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 public class Main {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
     @Option(name="-o",usage="json file")
     public File output = new File("output.json");
 
@@ -167,14 +172,19 @@ public class Main {
         PrintWriter latestRedirect = createHtaccessWriter();
 
         JSONObject ucRoot = buildUpdateCenterJson(repo, latestRedirect);
+
         writeToFile(updateCenterPostCallJson(ucRoot), output);
         writeToFile(updateCenterPostMessageHtml(ucRoot), new File(output.getPath()+".html"));
+
+        System.out.println();
+        System.out.println("Building full release history...");
 
         JSONObject rhRoot = buildFullReleaseHistory(repo);
         String rh = prettyPrintJson(rhRoot);
         writeToFile(rh, releaseHistory);
 
         latestRedirect.close();
+        repo.close();
     }
 
     String updateCenterPostCallJson(JSONObject ucRoot) {
@@ -272,15 +282,14 @@ public class Main {
         JSONObject plugins = new JSONObject();
         for( PluginHistory hpi : repository.listHudsonPlugins() ) {
             try {
-                System.out.println(hpi.artifactId);
 
                 Plugin plugin = new Plugin(hpi);
                 plugin.setNowiki(nowiki);
                 JSONObject json = plugin.toJSON();
-                System.out.println("=> " + json);
+                System.out.println("  => " + json);
                 plugins.put(plugin.artifactId, json);
 
-                String permalink = String.format("/latest/%s.%s", plugin.artifactId, plugin.latest.artifact.fextension);
+                String permalink = String.format("/latest/%s.%s", plugin.artifactId, plugin.latest.artifact.getFileExtension());
                 if(this.repository != null) {
                     // when -repository specified,
                     // put latest/ directory in that path.
@@ -379,7 +388,7 @@ public class Main {
                     if (h.getTimestampAsDate().after(oldestDate.getTime())) {
                         String title = plugin.getName();
                         if ((title==null) || (title.equals(""))) {
-                            title = h.artifact.artifactId;
+                            title = h.artifact.getArtifactId();
                         }
 
                         o.put("title", title);
@@ -387,12 +396,12 @@ public class Main {
                     }
                     o.put("gav", h.getGavId());
                     o.put("timestamp", h.getTimestamp());
-                    o.put("url", "https://plugins.jenkins.io/" + h.artifact.artifactId);
+                    o.put("url", "https://plugins.jenkins.io/" + h.artifact.getArtifactId());
 
                     System.out.println("\t" + h.getGavId());
                 } catch (IOException e) {
-                    System.out.println("Failed to resolve plugin " + h.artifact.artifactId + " so using defaults");
-                    o.put("title", h.artifact.artifactId);
+                    System.out.println("Failed to resolve plugin " + h.artifact.getArtifactId() + " so using defaults");
+                    o.put("title", h.artifact.getArtifactId());
                     o.put("wiki", "");
                 }
 
@@ -423,10 +432,14 @@ public class Main {
         });
 
         IndexHtmlBuilder index = new IndexHtmlBuilder(dir, title);
-        index.add(permalink,"permalink to the latest");
-        for (MavenArtifact a : list)
-            index.add(a);
-        index.close();
+        try {
+            index.add(permalink,"permalink to the latest");
+            for (MavenArtifact a : list)
+                index.add(a);
+        }
+        finally {
+            index.close();
+        }
     }
 
     /**

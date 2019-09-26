@@ -24,7 +24,7 @@
 package org.jvnet.hudson.update_center;
 
 import hudson.util.VersionNumber;
-import org.sonatype.nexus.index.ArtifactInfo;
+import org.apache.maven.index.ArtifactInfo;
 
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -47,17 +47,18 @@ public class HudsonWar extends MavenArtifact {
      */
     public MavenArtifact getCoreArtifact() {
         return new MavenArtifact(repository,new ArtifactInfo(
-                artifact.repository,
-                artifact.groupId,
-                artifact.artifactId.replace("war","core"),
-                artifact.version,
-                artifact.classifier
+                artifact.getRepository(),
+                artifact.getGroupId(),
+                artifact.getArtifactId().replace("war","core"),
+                artifact.getVersion(),
+                artifact.getClassifier(),
+                artifact.getFileExtension()
         ));
     }
 
     public String getFileName() {
         String fileName;
-        if (new VersionNumber(version).compareTo(MavenRepositoryImpl.CUT_OFF)<=0)
+        if (new VersionNumber(version).compareTo(MavenRepositoryNexus3Impl.CUT_OFF)<=0)
             fileName = "hudson.war";
         else
             fileName = "jenkins.war";

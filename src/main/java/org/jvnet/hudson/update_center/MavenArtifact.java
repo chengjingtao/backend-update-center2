@@ -27,7 +27,7 @@ import hudson.util.VersionNumber;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
-import org.sonatype.nexus.index.ArtifactInfo;
+import org.apache.maven.index.ArtifactInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,12 +66,12 @@ public class MavenArtifact {
     public MavenArtifact(MavenRepository repository, ArtifactInfo artifact) {
         this.artifact = artifact;
         this.repository = repository;
-        version = artifact.version;
+        version = artifact.getVersion();
     }
 
     public File resolve() throws IOException {
         try {
-            if (hpi==null)
+            if (hpi == null)
                 hpi = repository.resolve(artifact);
             return hpi;
         } catch (IllegalArgumentException e) {
@@ -96,25 +96,25 @@ public class MavenArtifact {
                     at org.jvnet.hudson.update_center.Main.checkLatestDate(Main.java:301)
                     at org.jvnet.hudson.update_center.Main.buildPlugins(Main.java:269)
              */
-            throw (IOException)new IOException("Failed to resolve artifact "+artifact).initCause(e);
+            throw (IOException) new IOException("Failed to resolve artifact " + artifact).initCause(e);
         } catch (AbstractArtifactResolutionException e) {
-            throw (IOException)new IOException("Failed to resolve artifact "+artifact).initCause(e);
+            throw (IOException) new IOException("Failed to resolve artifact " + artifact).initCause(e);
         }
     }
 
     public File resolvePOM() throws IOException {
         try {
-            return repository.resolve(artifact,"pom", null);
+            return repository.resolve(artifact, "pom", null);
         } catch (AbstractArtifactResolutionException e) {
-            throw (IOException)new IOException("Failed to resolve artifact "+artifact).initCause(e);
+            throw (IOException) new IOException("Failed to resolve artifact " + artifact).initCause(e);
         }
     }
 
     public File resolveSources() throws IOException {
         try {
-            return repository.resolve(artifact,"jar","sources");
+            return repository.resolve(artifact, "jar", "sources");
         } catch (AbstractArtifactResolutionException e) {
-            throw (IOException)new IOException("Failed to resolve artifact "+artifact).initCause(e);
+            throw (IOException) new IOException("Failed to resolve artifact " + artifact).initCause(e);
         }
     }
 
@@ -122,17 +122,20 @@ public class MavenArtifact {
      * Computes the SHA1 signature of the file.
      */
     public String getDigest() throws IOException {
+        FileInputStream fin = null;
         try {
             MessageDigest sig = MessageDigest.getInstance("SHA1");
-            FileInputStream fin = new FileInputStream(resolve());
+            fin = new FileInputStream(resolve());
             byte[] buf = new byte[2048];
             int len;
-            while ((len=fin.read(buf,0,buf.length))>=0)
-                sig.update(buf,0,len);
+            while ((len = fin.read(buf, 0, buf.length)) >= 0)
+                sig.update(buf, 0, len);
 
             return new String(Base64.encodeBase64(sig.digest()));
         } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
+        } finally {
+            fin.close();
         }
     }
 
@@ -143,7 +146,7 @@ public class MavenArtifact {
 
         o.put("url", getURL().toExternalForm());
         o.put("buildDate", getTimestampAsString());
-        o.put("sha1",getDigest());
+        o.put("sha1", getDigest());
 
         return o;
     }
@@ -164,7 +167,7 @@ public class MavenArtifact {
         SimpleDateFormat bdf = getDateFormat();
 
         Date tsDate;
-        
+
         try {
             tsDate = bdf.parse(bdf.format(new Date(lastModified)));
         } catch (ParseException pe) {
@@ -173,28 +176,31 @@ public class MavenArtifact {
 
         return tsDate;
     }
-    
+
     public static SimpleDateFormat getDateFormat() {
         return new SimpleDateFormat("MMM dd, yyyy", Locale.US);
     }
-        
+
     public long getTimestamp() throws IOException {
-        if (timestamp==0)
+        if (timestamp == 0)
             getManifest();
         return timestamp;
     }
 
     public Manifest getManifest() throws IOException {
-        if (manifest==null) {
+        if (manifest == null) {
             File f = resolve();
+            JarFile jar = null;
             try {
-                JarFile jar = new JarFile(f);
+                jar = new JarFile(f);
                 ZipEntry e = jar.getEntry("META-INF/MANIFEST.MF");
                 timestamp = e.getTime();
                 manifest = jar.getManifest();
                 jar.close();
             } catch (IOException x) {
-                throw (IOException)new IOException("Failed to open "+f).initCause(x);
+                throw (IOException) new IOException("Failed to open " + f).initCause(x);
+            }finally {
+                jar.close();
             }
         }
         return manifest;
@@ -208,7 +214,7 @@ public class MavenArtifact {
      * Where to download from?
      */
     public URL getURL() throws MalformedURLException {
-        return new URL("repo.jenkins-ci.org/public/"+artifact.groupId.replace('.','/')+"/"+artifact.artifactId+"/"+artifact.version+"/"+artifact.artifactId+"-"+artifact.version+"."+artifact.packaging);
+        return new URL("repo.jenkins-ci.org/public/" + artifact.getGroupId().replace('.', '/') + "/" + artifact.getArtifactId() + "/" + artifact.getVersion() + "/" + artifact.getArtifactId() + "-" + artifact.getVersion() + "." + artifact.getPackaging());
     }
 
     @Override
@@ -217,6 +223,6 @@ public class MavenArtifact {
     }
 
     public String getGavId() {
-        return artifact.groupId+':'+artifact.artifactId+':'+artifact.version;
+        return artifact.getGroupId() + ':' + artifact.getArtifactId() + ':' + artifact.getVersion();
     }
 }

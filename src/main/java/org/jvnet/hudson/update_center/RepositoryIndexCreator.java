@@ -26,14 +26,18 @@ package org.jvnet.hudson.update_center;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.apache.lucene.document.Document;
-import org.sonatype.nexus.artifact.Gav;
-import org.sonatype.nexus.artifact.GavCalculator;
-import org.sonatype.nexus.artifact.M2GavCalculator;
-import org.sonatype.nexus.index.ArtifactContext;
-import org.sonatype.nexus.index.ArtifactInfo;
-import org.sonatype.nexus.index.creator.AbstractIndexCreator;
+import org.apache.maven.index.IndexerField;
+import org.apache.maven.index.artifact.Gav;
+import org.apache.maven.index.artifact.GavCalculator;
+import org.apache.maven.index.artifact.M2GavCalculator;
+import org.apache.maven.index.ArtifactContext;
+import org.apache.maven.index.ArtifactInfo;
+import org.apache.maven.index.creator.AbstractIndexCreator;
 
 /**
  * Set the remoteUrl of artifact.
@@ -43,17 +47,25 @@ public class RepositoryIndexCreator extends AbstractIndexCreator
 {
     private static GavCalculator GAV_CALCURATOR = new M2GavCalculator();
     private URL repositoryUrl;
+
+    public static final String ID = "repository";
+
+    public RepositoryIndexCreator()
+    {
+        super( ID, Arrays.asList( RepositoryIndexCreator.ID ) );
+    }
     
     public RepositoryIndexCreator(URL repositoryUrl)
     {
+        super( ID, Arrays.asList( RepositoryIndexCreator.ID ) );
         this.repositoryUrl = repositoryUrl;
     }
+
     /**
      * @param artifactContext
      * @throws IOException
-     * @see org.sonatype.nexus.index.context.IndexCreator#populateArtifactInfo(org.sonatype.nexus.index.ArtifactContext)
+     * @see org.apache.maven.index.context.IndexCreator#populateArtifactInfo(org.apache.maven.index.ArtifactContext)
      */
-    @Override
     public void populateArtifactInfo(ArtifactContext artifactContext)
             throws IOException
     {
@@ -64,22 +76,19 @@ public class RepositoryIndexCreator extends AbstractIndexCreator
     /**
      * @param artifactInfo
      * @param document
-     * @see org.sonatype.nexus.index.context.IndexCreator#updateDocument(org.sonatype.nexus.index.ArtifactInfo, org.apache.lucene.document.Document)
+     * @see org.apache.maven.index.context.IndexCreator#updateDocument(org.apache.maven.index.ArtifactInfo, org.apache.lucene.document.Document)
      */
-    @Override
     public void updateDocument(ArtifactInfo artifactInfo, Document document)
     {
         // TODO Auto-generated method stub
-        
     }
     
     /**
      * @param document
      * @param artifactInfo
      * @return
-     * @see org.sonatype.nexus.index.context.IndexCreator#updateArtifactInfo(org.apache.lucene.document.Document, org.sonatype.nexus.index.ArtifactInfo)
+     * @see org.apache.maven.index.context.IndexCreator#updateArtifactInfo(org.apache.lucene.document.Document, org.apache.maven.index.ArtifactInfo)
      */
-    @Override
     public boolean updateArtifactInfo(Document document,
             ArtifactInfo artifactInfo)
     {
@@ -92,7 +101,7 @@ public class RepositoryIndexCreator extends AbstractIndexCreator
         
         try
         {
-            artifactInfo.remoteUrl = new URL(repositoryUrl, path).toString();
+            artifactInfo.setRemoteUrl(new URL(repositoryUrl, path).toString());
         }
         catch (MalformedURLException e)
         {
@@ -100,6 +109,11 @@ public class RepositoryIndexCreator extends AbstractIndexCreator
         }
         
         return true;
+    }
+
+    public Collection<IndexerField> getIndexerFields()
+    {
+        return Collections.emptyList();
     }
     
 }

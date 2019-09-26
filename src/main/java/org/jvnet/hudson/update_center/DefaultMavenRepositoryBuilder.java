@@ -23,35 +23,26 @@
  */
 package org.jvnet.hudson.update_center;
 
-import java.net.URL;
 
 public class DefaultMavenRepositoryBuilder {
-    public static MavenRepositoryImpl createStandardInstance() throws Exception {
+    public static MavenRepositoryNexus3Impl createStandardInstance() throws Exception {
         return createStandardInstance(null, null, null, false);
     }
     
-    public static MavenRepositoryImpl createStandardInstance(String repositoryName, String repository, String remoteIndex, boolean directLink) throws Exception {
-        MavenRepositoryImpl instance = new MavenRepositoryImpl(directLink);
+    public static MavenRepositoryNexus3Impl createStandardInstance(String repositoryName, String repositoryUrl, String remoteIndex, boolean directLink) throws Exception {
+        MavenRepositoryNexus3Impl instance = new MavenRepositoryNexus3Impl(directLink);
         
         if(repositoryName == null)
         {
             repositoryName = "public";
         }
         
-        if(repository == null)
+        if(repositoryUrl == null)
         {
-            repository = "http://repo.jenkins-ci.org/public/";
+            repositoryUrl = "http://repo.jenkins-ci.org/public/";
         }
-        
-        URL repositoryUrl = new URL(repository);
-        if(remoteIndex != null)
-        {
-            instance.addRemoteRepository(repositoryName, new URL(repositoryUrl, remoteIndex), repositoryUrl);
-        }
-        else
-        {
-            instance.addRemoteRepository(repositoryName, repositoryUrl);
-        }
+
+        instance.addRemoteRepository(repositoryName, repositoryUrl);
         
         return instance;
     }

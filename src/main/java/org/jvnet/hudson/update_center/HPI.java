@@ -26,7 +26,7 @@ package org.jvnet.hudson.update_center;
 import hudson.util.VersionNumber;
 import net.sf.json.JSONObject;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
-import org.sonatype.nexus.index.ArtifactInfo;
+import org.apache.maven.index.ArtifactInfo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class HPI extends MavenArtifact {
      * Relative path to be used in URL as well as in filename
      */
     public String getRelativePath() {
-        return String.format("plugins/%s/%s/%1$s.%s", artifact.artifactId, getShortVersion(), artifact.fextension);
+        return String.format("plugins/%s/%s/%1$s.%s", artifact.getArtifactId(), getShortVersion(), artifact.getFileExtension());
     }
 
     /**
@@ -103,7 +103,7 @@ public class HPI extends MavenArtifact {
         if (fixNull(v) != null) {
             try {
                 VersionNumber n = new VersionNumber(v);
-                if (n.compareTo(MavenRepositoryImpl.CUT_OFF)<=0)
+                if (n.compareTo(MavenRepositoryNexus3Impl.CUT_OFF)<=0)
                     return v;   // Hudson <= 1.395 is treated as Jenkins
                 // TODO: Jenkins-Version started appearing from Jenkins 1.401 POM.
                 // so maybe Hudson > 1.400 shouldn't be considered as a Jenkins plugin?
@@ -164,9 +164,9 @@ public class HPI extends MavenArtifact {
     }
 
     boolean isEqualsTo(String groupId, String artifactId, String version) {
-        return artifact.artifactId.equals(artifactId)
-            && artifact.groupId.equals(groupId)
-            && artifact.version.equals(version);
+        return artifact.getArtifactId().equals(artifactId)
+            && artifact.getGroupId().equals(groupId)
+            && artifact.getVersion().equals(version);
     }
 
     public static class Dependency {
@@ -232,6 +232,6 @@ public class HPI extends MavenArtifact {
      */
     public boolean isAuthenticJenkinsArtifact() {
         // mayebe it should be startWith("org.jenkins")?
-        return artifact.groupId.contains("jenkins");
+        return artifact.getGroupId().contains("jenkins");
     }
 }

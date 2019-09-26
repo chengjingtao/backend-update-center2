@@ -11,13 +11,13 @@ import java.util.TreeSet;
  */
 public class ListExisting {
     public static void main(String[] args) throws Exception{
-        MavenRepositoryImpl r = DefaultMavenRepositoryBuilder.createStandardInstance();
+        MavenRepositoryNexus3Impl r = DefaultMavenRepositoryBuilder.createStandardInstance();
 
         Set<String> groupIds = new TreeSet<String>();
         Collection<PluginHistory> all = r.listHudsonPlugins();
         for (PluginHistory p : all) {
             HPI hpi = p.latest();
-            groupIds.add(hpi.artifact.groupId);
+            groupIds.add(hpi.artifact.getGroupId());
         }
 
         for (String groupId : groupIds) {
